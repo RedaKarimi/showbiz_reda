@@ -37,6 +37,7 @@ plugins {
     id("fabric-loom")
     id("com.gradleup.shadow") version "9.2.2"
     id("me.modmuss50.mod-publish-plugin") version "1.1.0"
+    `maven-publish`
 }
 
 repositories {
@@ -265,6 +266,22 @@ kotlin {
 tasks.withType<KotlinCompile>() {
     compilerOptions {
         freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+}
+
+// Maven publishing, so local addons (../FNAF-Mod-Showbiz-Addon) can build against this
+// working copy instead of the Modrinth release.
+//   ./gradlew :1.21.1:publishToMavenLocal
+// artifactId MUST be set explicitly: stonecutter names this subproject "1.21.1", so the
+// maven-publish default of project.name would publish com.flooferland:1.21.1
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            groupId = project.group.toString()
+            artifactId = modId
+            version = project.version.toString()
+            from(components["java"])
+        }
     }
 }
 
